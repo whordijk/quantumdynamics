@@ -1,14 +1,16 @@
 module Wave1d
 
     use BiCGSTAB
+    use plplot
 
     implicit none
     private
 
     complex(8), allocatable :: A(:, :), b(:), psi(:)
+    real(8), allocatable :: x(:)
 
     public init_model
-    public calc_wave
+    public step
     public plot_wave
 
 contains
@@ -16,41 +18,40 @@ contains
     subroutine init_model(n)
 
         integer, intent(in) :: n
-        real(8) :: x(n)
-        allocate(A(n, n), b(n), psi(n))
 
-        call init_matrix(A)
+        allocate(A(n, n), b(n), psi(n), x(n))
+
+        call init_matrix()
         call linspace(n, x)
-        psi = exp(-x**2) * cmplx(cos(x), sin(x))
+        psi = exp(-200 * x**2) * cmplx(cos(200 * x), sin(200 * x))
         b = matmul(conjg(A), psi)
-
-        print *, "MODEL INITIALIZED"
 
     end subroutine
 
-    subroutine calc_wave()
+    subroutine step()
 
         call bicgstab_solve(A, b, psi)
         b = matmul(conjg(A), psi)        
-        print *, "calculated wave"
 
     end subroutine
 
     subroutine plot_wave()
 
-        print *, "plot wave"
+        call plclear()
+        call plline(x, real(psi)) 
+        call plflush()
 
     end subroutine
 
-    subroutine init_matrix(A)
+    subroutine init_matrix()
 
-        complex(8), intent(out) :: A(:, :)
         real(8), dimension(size(A, 1), size(A, 2)) :: Hamiltonian, eye, D, V
-        real(8) :: h
+        real(8) :: h, dt
         integer :: i, n
 
         n = size(A, 1)
         h = 1d0 / n
+        dt = 1d-3
         D = 0
         eye = 0
         V = 0
@@ -68,7 +69,7 @@ contains
         end do
         D = 1 / h**2 * D
         Hamiltonian = -0.5 * D + V
-        A = cmplx(eye, h / 2 * Hamiltonian)
+        A = cmplx(eye, dt / 2 * Hamiltonian)
 
     end subroutine
 
@@ -79,7 +80,7 @@ contains
         real(8) :: dx
         integer :: i
 
-        dx = 1 / (n - 1)
+        dx = 1d0 / (n - 1)
         do i = 1, n
             x(i) = (i - 1) * dx
         end do
