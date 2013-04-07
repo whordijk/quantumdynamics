@@ -10,7 +10,7 @@ LINK = $(FC) $(LDFLAGS)
 
 OBJS = 
 OBJS += BiCGSTAB.o
-OBJS += Wave1d.o
+OBJS += wave1d.o
 OBJS += QuantumDynamics.o
 
 all: QuantumDynamics
