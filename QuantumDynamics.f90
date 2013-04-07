@@ -1,20 +1,20 @@
 program QuantumDynamics
 
     use plplot
+    use Wave1d
 
     implicit none
 
-    call plparseopts(PL_PARSE_FULL)
+    integer, parameter :: tmax = 100
+    integer, parameter :: n = 100
+    integer :: i
 
-    print *, "test"
-    call printing()
+    call init_model(n)
+    do i = 1, tmax
+        call calc_wave()
+        call plot_wave()
+    end do
 
 contains
-
-    subroutine printing()
-
-        print *, "and some more"
-
-    end subroutine
 
 end program

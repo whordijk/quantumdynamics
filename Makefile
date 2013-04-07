@@ -9,6 +9,8 @@ COMPILE = $(FC) $(FFLAGS)
 LINK = $(FC) $(LDFLAGS)
 
 OBJS = 
+OBJS += BiCGSTAB.o
+OBJS += Wave1d.o
 OBJS += QuantumDynamics.o
 
 all: QuantumDynamics
