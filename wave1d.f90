@@ -1,4 +1,4 @@
-module Wave1d
+module wave1d
 
     use BiCGSTAB
     use plplot
