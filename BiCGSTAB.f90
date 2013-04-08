@@ -22,7 +22,7 @@ contains
         v = 0
         p = 0
 
-        do while (real(sqrt(sum(r**2))) > 1d-3)
+        do while (real(sqrt(sum(r**2))) > 1d-5)
             rhoold = rho
             rho = dot_product(rhat, r)
             beta = (rho / rhoold) * (alpha / omega)

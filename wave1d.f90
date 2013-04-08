@@ -56,15 +56,15 @@ contains
         eye = 0
         V = 0
         do i = 1, n
-            D(i, i) = 2
+            D(i, i) = -2
             eye(i, i) = 1
             if (i == 1) then
-                D(i + 1, i) = -1
+                D(i + 1, i) = 1
             else if (i == n) then
-                D(i - 1, i) = -1
+                D(i - 1, i) = 1
             else
-                D(i + 1, i) = -1
-                D(i - 1, i) = -1
+                D(i + 1, i) = 1
+                D(i - 1, i) = 1
             end if
         end do
         D = 1 / h**2 * D
