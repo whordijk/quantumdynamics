@@ -23,14 +23,18 @@ contains
 
         call init_matrix()
         call linspace(n, x)
-        psi = exp(-200 * x**2) * cmplx(cos(200 * x), sin(200 * x))
+        psi = exp(-200 * (x-0.5)**2) * cmplx(cos(200 * (x-0.5)), sin(200 * (x-0.5)))
         b = matmul(conjg(A), psi)
 
     end subroutine
 
     subroutine step()
 
-        call bicgstab_solve(A, b, psi)
+        real(8) :: eps
+
+        eps = 1d-16
+
+        call bicgstab_solve(A, b, psi, eps)
         b = matmul(conjg(A), psi)        
 
     end subroutine
@@ -67,9 +71,8 @@ contains
                 D(i - 1, i) = 1
             end if
         end do
-        ! "open" boundaries, i.e. d/dx = 0. Is this ok...?
-        D(1, 2) = 2
-        D(n, n - 1) = 2
+        D(1, n) = 1
+        D(n, 1) = 1
         !
         D = 1 / h**2 * D
         Hamiltonian = -0.5 * D + V

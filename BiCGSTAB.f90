@@ -7,9 +7,10 @@ module BiCGSTAB
 
 contains
 
-    subroutine bicgstab_solve(A, b, x)
+    subroutine bicgstab_solve(A, b, x, eps)
 
         complex(8), intent(in) :: A(:, :), b(:)
+        real(8), intent(in) :: eps
         complex(8), intent(inout) :: x(:)
         complex(8), dimension(size(x)) :: r, rhat, p, v, s, t
         complex(8) :: rho, rhoold, alpha, beta, omega
@@ -25,7 +26,7 @@ contains
         babs = real(sqrt(sum(b**2)))
         error = real(sqrt(sum(r**2))) / babs
 
-        do while (error > 1d-6)
+        do while (error > eps)
             rhoold = rho
             rho = dot_product(rhat, r)
             beta = (rho / rhoold) * (alpha / omega)
