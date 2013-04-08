@@ -51,7 +51,7 @@ contains
 
         n = size(A, 1)
         h = 1d0 / n
-        dt = 1d-3
+        dt = 1d-6
         D = 0
         eye = 0
         V = 0
@@ -67,6 +67,10 @@ contains
                 D(i - 1, i) = 1
             end if
         end do
+        ! "open" boundaries, i.e. d/dx = 0. Is this ok...?
+        D(1, 2) = 2
+        D(n, n - 1) = 2
+        !
         D = 1 / h**2 * D
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
