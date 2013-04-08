@@ -8,6 +8,7 @@ module wave1d
 
     complex(8), allocatable :: A(:, :), b(:), psi(:)
     real(8), allocatable :: x(:)
+    real(8) :: dx, dt
 
     public init_model
     public step
@@ -19,11 +20,14 @@ contains
 
         integer, intent(in) :: n
 
+        dx = 1d0 / n
+        dt = 1d-6
+
         allocate(A(n, n), b(n), psi(n), x(n))
 
         call init_matrix()
         call linspace(n, x)
-        psi = exp(-200 * (x-0.5)**2) * cmplx(cos(200 * (x-0.5)), sin(200 * (x-0.5)))
+        psi = exp(-100 * (x-0.5)**2 / 2) * cmplx(cos(100 * (x-0.5)), sin(100 * (x-0.5)))
         b = matmul(conjg(A), psi)
 
     end subroutine
@@ -50,12 +54,9 @@ contains
     subroutine init_matrix()
 
         real(8), dimension(size(A, 1), size(A, 2)) :: Hamiltonian, eye, D, V
-        real(8) :: h, dt
         integer :: i, n
 
         n = size(A, 1)
-        h = 1d0 / n
-        dt = 1d-6
         D = 0
         eye = 0
         V = 0
@@ -74,7 +75,7 @@ contains
         D(1, n) = 1
         D(n, 1) = 1
         !
-        D = 1 / h**2 * D
+        D = 1 / dx**2 * D
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
 
