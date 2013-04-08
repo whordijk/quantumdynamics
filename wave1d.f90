@@ -36,7 +36,7 @@ contains
 
         real(8) :: eps
 
-        eps = 1d-16
+        eps = dx**2 * dt**2
 
         call bicgstab_solve(A, b, psi, eps)
         b = matmul(conjg(A), psi)        
