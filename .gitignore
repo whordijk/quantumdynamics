@@ -1,0 +1,4 @@
+QuantumDynamics
+*.o
+*.mod
+.gitnignore
