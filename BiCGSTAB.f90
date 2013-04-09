@@ -23,8 +23,8 @@ contains
         omega = 1
         v = 0
         p = 0
-        babs = real(sqrt(sum(b**2)))
-        error = real(sqrt(sum(r**2))) / babs
+        babs = sqrt(sum(abs(b)**2))
+        error = sqrt(sum(abs(r)**2)) / babs
 
         do while (error > eps)
             rhoold = rho
@@ -38,7 +38,7 @@ contains
             omega = dot_product(t, s) / dot_product(t, t)
             x = x + alpha * p + omega * s
             r = s - omega * t
-            error = real(sqrt(sum(r**2))) / babs
+            error = sqrt(sum(abs(r)**2)) / babs
         end do
 
     end subroutine

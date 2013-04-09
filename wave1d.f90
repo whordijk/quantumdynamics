@@ -6,9 +6,10 @@ module wave1d
     implicit none
     private
 
+    real(8), parameter :: pi = 4 * atan(1d0)
     complex(8), allocatable :: A(:, :), b(:), psi(:)
     real(8), allocatable :: x(:)
-    real(8) :: dx, dt
+    real(8) :: L, dx, dt, eps
 
     public init_model
     public step
@@ -16,34 +17,26 @@ module wave1d
 
 contains
 
-    subroutine init_model(n)
+    subroutine init_model(sample_length, n)
 
         integer, intent(in) :: n
-        real(8) :: p1, p2
+        real(8), intent(in) :: sample_length
 
-        dx = 1d0 / (n - 1)
+        L = sample_length
+        dx = sample_length / (n - 1)
         dt = 1d-5
+        eps = dx**2 * dt**2
 
         allocate(A(n, n), b(n), psi(n), x(n))
 
-        call init_matrix()
         call linspace(n, x)
-        p1 = 0.25
-        p2 = p1 + 1 + dx
-        psi = exp(-100 * (x - p1)**2 / 2) &
-            * cmplx(cos(100 * (x - p1)), sin(100 * (x - p1))) &
-            + exp(-100 * (x - p2)**2 / 2) &
-                * cmplx(cos(100 * (x - p2)), sin(100 * (x - p2)))
-        b = matmul(conjg(A), psi)
+        call init_matrix()
+        call init_wave()
 
     end subroutine
 
     subroutine step()
 
-        real(8) :: eps
-
-        ! eps = dx**2 * dt**2
-        eps = 1d-16
         call bicgstab_solve(A, b, psi, eps)
         b = matmul(conjg(A), psi)        
 
@@ -78,11 +71,32 @@ contains
                 D(i - 1, i) = 1
             end if
         end do
-        D(1, n) = 1
-        D(n, 1) = 1
+        !D(1, n) = 1
+        !D(n, 1) = 1
         D = 1 / dx**2 * D
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
+        A(1, 1) = 1
+        A(n, n) = 1
+
+    end subroutine
+
+    subroutine init_wave()
+
+        real(8), parameter :: k = 500 / (2 * pi)
+        real(8), parameter :: p1 = 0.4
+        real(8) :: p2
+
+        p2 = p1 + L + dx
+        psi = exp(-100 * (x - p1)**2 / 2) &
+                * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
+                / sqrt(2* pi * 100) &
+            + exp(-100 * (x - p2)**2 / 2) &
+                * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
+                / sqrt(2 * pi * 100)
+        psi(1) = 0
+        psi(size(psi)) = 0
+        b = matmul(conjg(A), psi)
 
     end subroutine
 

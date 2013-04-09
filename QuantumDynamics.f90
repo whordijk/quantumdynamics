@@ -5,16 +5,17 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: ndt = 10000
-    integer, parameter :: n = 500
+    integer, parameter :: num_dt = 10000
+    real(8), parameter :: sample_length = 1
+    integer, parameter :: num_nodes = 200
     integer :: i
 
-    call init_model(n)
+    call init_model(sample_length, num_nodes)
     call init_graphics()
     call plot_wave()
-    do i = 1, ndt
+    do i = 1, num_dt
         call step()
-        if (mod(i, 5) == 0) then
+        if (mod(i, 1) == 0) then
             call plot_wave()
         end if
     end do
@@ -43,7 +44,7 @@ contains
         call plinit()
 
         call plcol0(7)
-        call plenv(0d0, 1d0, -1d0, 1d0, 0, 0)
+        call plenv(0d0, sample_length, -0.1d0, 0.1d0, 0, 0)
         call pllab("x", "\psi", "Wave plot")
 
         call plcol0(1)
