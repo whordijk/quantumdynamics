@@ -8,8 +8,9 @@ module wave1d
 
     real(8), parameter :: pi = 4 * atan(1d0)
     complex(8), allocatable :: A(:, :), b(:), psi(:)
-    real(8), allocatable :: x(:)
+    real(8), allocatable :: potential(:), x(:)
     real(8) :: L, dx, dt, eps
+    integer :: n
 
     public init_model
     public step
@@ -17,17 +18,17 @@ module wave1d
 
 contains
 
-    subroutine init_model(sample_length, n)
+    subroutine init_model(sample_length)
 
-        integer, intent(in) :: n
         real(8), intent(in) :: sample_length
 
         L = sample_length
+        n = nint(sample_length * 200)
         dx = sample_length / (n - 1)
         dt = 1d-4
         eps = dx**2 * dt**2
 
-        allocate(A(n, n), b(n), psi(n), x(n))
+        allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
         call linspace(n, x)
         call init_matrix()
@@ -45,20 +46,21 @@ contains
     subroutine plot_wave()
 
         call plclear()
-        call plline(x, real(psi)) 
+        call plline(x, real(psi))
+        call plcol0(7)
+        call plline(x, potential)
+        call plcol0(1)
         call plflush()
 
     end subroutine
 
     subroutine init_matrix()
 
-        real(8), dimension(size(A, 1), size(A, 2)) :: Hamiltonian, eye, D, V
-        integer :: i, n
+        real(8), dimension(n, n) :: Hamiltonian, eye, D, V
+        integer :: i
 
-        n = size(A, 1)
         D = 0
         eye = 0
-        V = 0
         do i = 1, n
             D(i, i) = -2
             eye(i, i) = 1
@@ -71,6 +73,16 @@ contains
                 D(i - 1, i) = 1
             end if
         end do
+        
+        potential = 0
+        V = 0
+        !do i = 1, n
+        !    if (i > 0.4 * n .and. i < 0.5 * n) then
+        !        V(i, i) = 1
+        !        potential(i) = 0.05 * V(i, i)
+        !        V(i, i) = 1000 * V(i,i)
+        !    end if
+        !end do
         ! Von Neumann boundary conditions:
         ! D(1, 2) = 2
         ! D(n, n - 1) = 2
@@ -85,15 +97,15 @@ contains
 
     subroutine init_wave()
 
-        real(8), parameter :: k = 100
-        real(8), parameter :: p1 = 0.4
+        real(8), parameter :: k = 50
+        real(8), parameter :: p1 = 0.8
         real(8) :: p2
 
         p2 = p1 + L + dx
-        psi = exp(-100 * (x - p1)**2 / 2) &
+        psi = exp(-50 * (x - p1)**2 / 2) &
                 * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
                 / sqrt(2* pi * 100) &
-            + exp(-100 * (x - p2)**2 / 2) &
+            + exp(-50 * (x - p2)**2 / 2) &
                 * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
                 / sqrt(2 * pi * 100)
         b = matmul(conjg(A), psi)
