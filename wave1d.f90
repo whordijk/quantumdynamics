@@ -85,7 +85,7 @@ contains
 
     subroutine init_wave()
 
-        real(8), parameter :: k = 500 / (2 * pi)
+        real(8), parameter :: k = 100
         real(8), parameter :: p1 = 0.4
         real(8) :: p2
 
