@@ -24,7 +24,7 @@ contains
 
         L = sample_length
         dx = sample_length / (n - 1)
-        dt = 1d-5
+        dt = 1d-4
         eps = dx**2 * dt**2
 
         allocate(A(n, n), b(n), psi(n), x(n))
@@ -71,13 +71,15 @@ contains
                 D(i - 1, i) = 1
             end if
         end do
-        !D(1, n) = 1
-        !D(n, 1) = 1
+        ! Von Neumann boundary conditions:
+        ! D(1, 2) = 2
+        ! D(n, n - 1) = 2
+        ! Periodic boundary conditions:
+        D(1, n) = 1
+        D(n, 1) = 1
         D = 1 / dx**2 * D
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
-        A(1, 1) = 1
-        A(n, n) = 1
 
     end subroutine
 
@@ -94,8 +96,6 @@ contains
             + exp(-100 * (x - p2)**2 / 2) &
                 * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
                 / sqrt(2 * pi * 100)
-        psi(1) = 0
-        psi(size(psi)) = 0
         b = matmul(conjg(A), psi)
 
     end subroutine
