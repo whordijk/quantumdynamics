@@ -6,7 +6,7 @@ program QuantumDynamics
     implicit none
 
     integer, parameter :: ndt = 10000
-    integer, parameter :: n = 250
+    integer, parameter :: n = 500
     integer :: i
 
     call init_model(n)

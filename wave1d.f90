@@ -19,18 +19,21 @@ contains
     subroutine init_model(n)
 
         integer, intent(in) :: n
+        real(8) :: p1, p2
 
         dx = 1d0 / (n - 1)
-        dt = 1d-4
+        dt = 1d-5
 
         allocate(A(n, n), b(n), psi(n), x(n))
 
         call init_matrix()
         call linspace(n, x)
-        print *, x
-        psi = exp(-100 * x**2 / 2) * cmplx(cos(100 * x), sin(100 * x)) &
-            + exp(-100 * (x - (1 + dx))**2 / 2) &
-                * cmplx(cos(100 * (x - (1 + dx))), sin(100 * (x - (1 + dx))))
+        p1 = 0.25
+        p2 = p1 + 1 + dx
+        psi = exp(-100 * (x - p1)**2 / 2) &
+            * cmplx(cos(100 * (x - p1)), sin(100 * (x - p1))) &
+            + exp(-100 * (x - p2)**2 / 2) &
+                * cmplx(cos(100 * (x - p2)), sin(100 * (x - p2)))
         b = matmul(conjg(A), psi)
 
     end subroutine
@@ -41,7 +44,6 @@ contains
 
         ! eps = dx**2 * dt**2
         eps = 1d-16
-
         call bicgstab_solve(A, b, psi, eps)
         b = matmul(conjg(A), psi)        
 
