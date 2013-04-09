@@ -20,4 +20,4 @@ QuantumDynamics: $(OBJS)
 %.o: %.f90
 	$(COMPILE) -o $@ -c $<
 clean:
-	$(RM) sums $(OBJS) *.mod
+	$(RM) $(OBJS) *.mod

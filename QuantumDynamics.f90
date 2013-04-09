@@ -14,7 +14,7 @@ program QuantumDynamics
     call plot_wave()
     do i = 1, ndt
         call step()
-        if (mod(i, 10) == 0) then
+        if (mod(i, 5) == 0) then
             call plot_wave()
         end if
     end do

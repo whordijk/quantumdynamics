@@ -20,14 +20,17 @@ contains
 
         integer, intent(in) :: n
 
-        dx = 1d0 / n
-        dt = 1d-6
+        dx = 1d0 / (n - 1)
+        dt = 1d-4
 
         allocate(A(n, n), b(n), psi(n), x(n))
 
         call init_matrix()
         call linspace(n, x)
-        psi = exp(-100 * (x-0.5)**2 / 2) * cmplx(cos(100 * (x-0.5)), sin(100 * (x-0.5)))
+        print *, x
+        psi = exp(-100 * x**2 / 2) * cmplx(cos(100 * x), sin(100 * x)) &
+            + exp(-100 * (x - (1 + dx))**2 / 2) &
+                * cmplx(cos(100 * (x - (1 + dx))), sin(100 * (x - (1 + dx))))
         b = matmul(conjg(A), psi)
 
     end subroutine
@@ -36,7 +39,8 @@ contains
 
         real(8) :: eps
 
-        eps = dx**2 * dt**2
+        ! eps = dx**2 * dt**2
+        eps = 1d-16
 
         call bicgstab_solve(A, b, psi, eps)
         b = matmul(conjg(A), psi)        
@@ -74,7 +78,6 @@ contains
         end do
         D(1, n) = 1
         D(n, 1) = 1
-        !
         D = 1 / dx**2 * D
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
@@ -85,10 +88,8 @@ contains
 
         integer, intent(in) :: n
         real(8), intent(out) :: x(n)
-        real(8) :: dx
         integer :: i
 
-        dx = 1d0 / (n - 1)
         do i = 1, n
             x(i) = (i - 1) * dx
         end do
