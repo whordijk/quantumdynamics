@@ -23,9 +23,9 @@ contains
         real(8), intent(in) :: sample_length
 
         L = sample_length
-        n = nint(sample_length * 200)
+        n = nint(sample_length * 100)
         dx = sample_length / (n - 1)
-        dt = 1d-4
+        dt = 5d-4
         eps = dx**2 * dt**2
 
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
@@ -47,6 +47,10 @@ contains
 
         call plclear()
         call plline(x, real(psi))
+        call plcol0(6)
+        call plline(x, aimag(psi))
+        call plcol0(3)
+        call plline(x, 4 * pi**2 * real(psi * conjg(psi)))
         call plcol0(7)
         call plline(x, potential)
         call plcol0(1)
@@ -76,13 +80,11 @@ contains
         
         potential = 0
         V = 0
-        !do i = 1, n
-        !    if (i > 0.4 * n .and. i < 0.5 * n) then
-        !        V(i, i) = 1
-        !        potential(i) = 0.05 * V(i, i)
-        !        V(i, i) = 1000 * V(i,i)
-        !    end if
-        !end do
+        do i = 1, n
+            V(i, i) = (2 / L * x(i) - 1)**12
+            potential(i) = 0.05 * V(i, i)
+            V(i, i) = 10000 * V(i,i)
+        end do
         ! Von Neumann boundary conditions:
         ! D(1, 2) = 2
         ! D(n, n - 1) = 2
@@ -98,9 +100,9 @@ contains
     subroutine init_wave()
 
         real(8), parameter :: k = 50
-        real(8), parameter :: p1 = 0.8
-        real(8) :: p2
+        real(8) :: p1, p2
 
+        p1 = L / 2
         p2 = p1 + L + dx
         psi = exp(-50 * (x - p1)**2 / 2) &
                 * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &

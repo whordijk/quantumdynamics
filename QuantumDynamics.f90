@@ -5,8 +5,8 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 2000
-    real(8), parameter :: sample_length = 5
+    integer, parameter :: timesteps = 4000
+    real(8), parameter :: sample_length = 3
     integer :: i
 
     call init_model(sample_length)
