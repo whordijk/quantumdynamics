@@ -31,8 +31,8 @@ contains
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
         call linspace(n, x)
-        call init_matrix()
-        call init_wave()
+        call init_matrix(.true.) ! argument switches the potential on/off
+        call init_wave(0.5d0)
 
     end subroutine
 
@@ -50,7 +50,7 @@ contains
         call plcol0(6)
         call plline(x, aimag(psi))
         call plcol0(3)
-        call plline(x, 4 * pi**2 * real(psi * conjg(psi)))
+        call plline(x, 2 * pi**2 * real(psi * conjg(psi)))
         call plcol0(7)
         call plline(x, potential)
         call plcol0(1)
@@ -58,8 +58,9 @@ contains
 
     end subroutine
 
-    subroutine init_matrix()
+    subroutine init_matrix(switch)
 
+        logical, intent(in) :: switch
         real(8), dimension(n, n) :: Hamiltonian, eye, D, V
         integer :: i
 
@@ -80,36 +81,37 @@ contains
         
         potential = 0
         V = 0
-        do i = 1, n
-            V(i, i) = (2 / L * x(i) - 1)**12
-            potential(i) = 0.05 * V(i, i)
-            V(i, i) = 10000 * V(i,i)
-        end do
-        ! Von Neumann boundary conditions:
-        ! D(1, 2) = 2
-        ! D(n, n - 1) = 2
-        ! Periodic boundary conditions:
+        if (switch .eqv. .true.) then
+            do i = 1, n
+                V(i, i) = (2 / L * x(i) - 1)**12
+                potential(i) = 0.05 * V(i, i)
+                V(i, i) = 10000 * V(i,i)
+            end do
+        end if
         D(1, n) = 1
         D(n, 1) = 1
         D = 1 / dx**2 * D
+        
         Hamiltonian = -0.5 * D + V
         A = cmplx(eye, dt / 2 * Hamiltonian)
 
     end subroutine
 
-    subroutine init_wave()
+    subroutine init_wave(p)
 
+        real(8), intent(in) :: p
         real(8), parameter :: k = 50
-        real(8) :: p1, p2
+        real(8) :: p1, p2, d
 
-        p1 = L / 2
+        d = 50
+        p1 = p * L
         p2 = p1 + L + dx
-        psi = exp(-50 * (x - p1)**2 / 2) &
-                * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
-                / sqrt(2* pi * 100) &
-            + exp(-50 * (x - p2)**2 / 2) &
-                * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
-                / sqrt(2 * pi * 100)
+        psi = exp(-d * (x - p1)**2 / 2) &
+            * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
+            / sqrt(2 * pi * d) &
+            + exp(-d * (x - p2)**2 / 2) &
+            * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
+            / sqrt(2 * pi * d)
         b = matmul(conjg(A), psi)
 
     end subroutine
