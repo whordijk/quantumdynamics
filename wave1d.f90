@@ -32,7 +32,7 @@ contains
 
         call linspace(n, x)
         call init_matrix(.true.) ! argument switches the potential on/off
-        call init_wave(0.5d0)
+        call init_wave(0.5d0)    ! argument decides on what fraction of the domain the wave is set
 
     end subroutine
 
