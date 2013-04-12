@@ -1,5 +1,5 @@
 FC = gfortran
-FFLAGS = -Wall -Wextra -march=native -O3
+FFLAGS = -Wall -Wextra -march=native -O3 -ffast-math
 FFLAGS += $(shell pkg-config --cflags plplotd-f95)
 LDLFLAGS =
 LIBS = -llapack

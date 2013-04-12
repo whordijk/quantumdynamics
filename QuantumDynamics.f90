@@ -5,8 +5,8 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 4000
-    real(8), parameter :: sample_length = 5
+    integer, parameter :: timesteps = 10000
+    real(8), parameter :: sample_length = 4
     integer :: i
 
     call init_model(sample_length)
@@ -18,7 +18,7 @@ program QuantumDynamics
             call plot_wave()
         end if
     end do
-    call plspause(.false.)
+    call plspause(.true.)
     call plend()
 
 contains

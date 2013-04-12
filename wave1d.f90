@@ -23,16 +23,16 @@ contains
         real(8), intent(in) :: sample_length
 
         L = sample_length
-        n = nint(sample_length * 100)
+        n = nint(sample_length * 200)
         dx = sample_length / (n - 1)
-        dt = 5d-4
-        eps = dx**2 * dt**2
+        dt = 1d-4
+        eps = dx**2 * dt**3
 
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
         call linspace(n, x)
         call init_matrix(.true.) ! argument switches the potential on/off
-        call init_wave(0.5d0)    ! argument decides on what fraction of the domain the wave is set
+        call init_wave(0.2d0)    ! argument decides on what fraction of the domain the wave is set
 
     end subroutine
 
@@ -83,7 +83,7 @@ contains
         V = 0
         if (switch .eqv. .true.) then
             do i = 1, n
-                V(i, i) = (2 / L * x(i) - 1)**12
+                V(i, i) = (2 / L * x(i) - 1)**80
                 potential(i) = 0.05 * V(i, i)
                 V(i, i) = 10000 * V(i,i)
             end do
@@ -101,17 +101,20 @@ contains
 
         real(8), intent(in) :: p
         real(8), parameter :: k = 50
-        real(8) :: p1, p2, d
+        real(8) :: x_0, d
 
         d = 50
-        p1 = p * L
-        p2 = p1 + L + dx
-        psi = exp(-d * (x - p1)**2 / 2) &
-            * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
-            / sqrt(2 * pi * d) &
-            + exp(-d * (x - p2)**2 / 2) &
-            * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
+        x_0 = p * L
+        psi = exp(-d * mod(x - x_0, L + dx)**2 / 2) &
+            * cmplx(cos(k * mod(x - x_0, L + dx)), sin(k * mod(x - x_0, L + dx))) & 
             / sqrt(2 * pi * d)
+!        p2 = p1 + L + dx
+!        psi = exp(-d * (x - p1)**2 / 2) &
+!            * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
+!            / sqrt(2 * pi * d) &
+!            + exp(-d * (x - p2)**2 / 2) &
+!            * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
+!            / sqrt(2 * pi * d)
         b = matmul(conjg(A), psi)
 
     end subroutine
