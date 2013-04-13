@@ -1,6 +1,5 @@
 module wave1d
 
-    use BiCGSTAB
     use plplot
 
     implicit none
@@ -25,20 +24,33 @@ contains
         L = sample_length
         n = nint(sample_length * 200)
         dx = sample_length / (n - 1)
-        dt = 1d-4
+        dt = 5d-4
         eps = dx**2 * dt**3
 
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
         call linspace(n, x)
         call init_matrix(.true.) ! argument switches the potential on/off
-        call init_wave(0.2d0)    ! argument decides on what fraction of the domain the wave is set
+        call init_wave(0.2d0)    ! fraction of the domain the wave is set
 
     end subroutine
 
     subroutine step()
 
-        call bicgstab_solve(A, b, psi, eps)
+        complex(8) :: dl(n - 1), du(n - 1)
+        complex(8) :: d(n)
+        integer :: info
+        integer :: i
+
+        d(1) = A(1, 1)
+        do i = 2, n
+            dl(i - 1) = A(i, i - 1)
+            du(i - 1) = A(i - 1, i)
+            d(i) = A(i, i)
+        end do
+        call zgtsv(n, 1, dl, d, du, b, n, INFO)
+        print *, info
+        psi = b
         b = matmul(conjg(A), psi)        
 
     end subroutine
@@ -83,13 +95,19 @@ contains
         V = 0
         if (switch .eqv. .true.) then
             do i = 1, n
-                V(i, i) = (2 / L * x(i) - 1)**80
-                potential(i) = 0.05 * V(i, i)
-                V(i, i) = 10000 * V(i,i)
+                if (i > 0.375 * n .and. i < 0.425 * n) then
+                    V(i, i) = 1
+                else if (i > 0.575 * n .and. i < 0.625 * n) then
+                    V(i, i) = 1
+                end if
+                !V(i, i) = (2 / L * x(i) - 1)**80
+                potential(i) = 0.01 * V(i, i)
+                V(i, i) = 1000 * V(i,i)
             end do
         end if
-        D(1, n) = 1
-        D(n, 1) = 1
+        ! periodic boundary condtions, need to be turned off for CGTSV method!
+        ! D(1, n) = 1
+        ! D(n, 1) = 1
         D = 1 / dx**2 * D
         
         Hamiltonian = -0.5 * D + V
@@ -101,20 +119,19 @@ contains
 
         real(8), intent(in) :: p
         real(8), parameter :: k = 50
+        real(8) :: arg(n)
         real(8) :: x_0, d
 
         d = 50
         x_0 = p * L
-        psi = exp(-d * mod(x - x_0, L + dx)**2 / 2) &
-            * cmplx(cos(k * mod(x - x_0, L + dx)), sin(k * mod(x - x_0, L + dx))) & 
+        arg = x - x_0
+        psi = exp(-d * arg**2 / 2) &
+            * cmplx(cos(k * arg), sin(k * arg)) &
             / sqrt(2 * pi * d)
-!        p2 = p1 + L + dx
-!        psi = exp(-d * (x - p1)**2 / 2) &
-!            * cmplx(cos(k * (x - p1)), sin(k * (x - p1))) &
-!            / sqrt(2 * pi * d) &
-!            + exp(-d * (x - p2)**2 / 2) &
-!            * cmplx(cos(k * (x - p2)), sin(k * (x - p2))) &
-!            / sqrt(2 * pi * d)
+        arg = x - (x_0 + L + dx)
+        psi = psi + exp(-d * arg**2 / 2) &
+            * cmplx(cos(k * arg), sin(k * arg)) &
+            / sqrt(2 * pi * d)
         b = matmul(conjg(A), psi)
 
     end subroutine
