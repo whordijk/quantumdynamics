@@ -3,6 +3,7 @@ FFLAGS = -Wall -Wextra -march=native -O3 -ffast-math
 FFLAGS += $(shell pkg-config --cflags plplotd-f95)
 LDLFLAGS =
 LIBS = -llapack
+LIBS += -lfftw3
 LIBS += $(shell pkg-config --libs plplotd-f95)
 
 COMPILE = $(FC) $(FFLAGS)
@@ -10,7 +11,8 @@ LINK = $(FC) $(LDFLAGS)
 
 OBJS = 
 OBJS += BiCGSTAB.o
-OBJS += wave1d.o
+OBJS += cranknicolson.o
+OBJS += splitoperator.o
 OBJS += QuantumDynamics.o
 
 all: QuantumDynamics

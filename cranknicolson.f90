@@ -1,6 +1,7 @@
-module wave1d
+module cranknicolson
 
     use plplot
+    use BiCGSTAB
 
     implicit none
     private
@@ -22,36 +23,36 @@ contains
         real(8), intent(in) :: sample_length
 
         L = sample_length
-        n = nint(sample_length * 200)
+        n = nint(sample_length * 100)
         dx = sample_length / (n - 1)
-        dt = 5d-4
+        dt = dx**2
         eps = dx**2 * dt**3
 
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
         call linspace(n, x)
-        call init_matrix(.true.) ! argument switches the potential on/off
+        call init_matrix(.false.) ! argument switches the potential on/off
         call init_wave(0.2d0)    ! fraction of the domain the wave is set
 
     end subroutine
 
     subroutine step()
 
-        complex(8) :: dl(n - 1), du(n - 1)
-        complex(8) :: d(n)
-        integer :: info
-        integer :: i
+        !complex(8) :: dl(n - 1), du(n - 1)
+        !complex(8) :: d(n)
+        !integer :: info
+        !integer :: i
 
-        d(1) = A(1, 1)
-        do i = 2, n
-            dl(i - 1) = A(i, i - 1)
-            du(i - 1) = A(i - 1, i)
-            d(i) = A(i, i)
-        end do
-        call zgtsv(n, 1, dl, d, du, b, n, INFO)
-        print *, info
-        psi = b
-        b = matmul(conjg(A), psi)        
+        !d(1) = A(1, 1)
+        !do i = 2, n
+        !    dl(i - 1) = A(i, i - 1)
+        !    du(i - 1) = A(i - 1, i)
+        !    d(i) = A(i, i)
+        !end do
+        !call zgtsv(n, 1, dl, d, du, b, n, INFO)
+        call bicgstab_solve(A, b, psi, eps)
+        !psi = b
+        b = matmul(conjg(A), psi)
 
     end subroutine
 
@@ -106,8 +107,8 @@ contains
             end do
         end if
         ! periodic boundary condtions, need to be turned off for CGTSV method!
-        ! D(1, n) = 1
-        ! D(n, 1) = 1
+        D(1, n) = 1
+        D(n, 1) = 1
         D = 1 / dx**2 * D
         
         Hamiltonian = -0.5 * D + V

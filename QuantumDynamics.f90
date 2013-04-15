@@ -1,11 +1,12 @@
 program QuantumDynamics
 
     use plplot
-    use wave1d
+    !use cranknicolson
+    use splitoperator
 
     implicit none
 
-    integer, parameter :: timesteps = 100000
+    integer, parameter :: timesteps = 1
     real(8), parameter :: sample_length = 4
     integer :: i
 
