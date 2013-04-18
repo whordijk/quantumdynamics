@@ -1,12 +1,12 @@
 program QuantumDynamics
 
     use plplot
-    !use cranknicolson
-    use splitoperator
+    use cranknicolson
+    ! use splitoperator
 
     implicit none
 
-    integer, parameter :: timesteps = 1
+    integer, parameter :: timesteps = 10000
     real(8), parameter :: sample_length = 4
     integer :: i
 

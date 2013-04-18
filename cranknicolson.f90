@@ -7,6 +7,7 @@ module cranknicolson
     private
 
     real(8), parameter :: pi = 4 * atan(1d0)
+    complex(8), parameter :: ii = (0d0, 1d0)
     complex(8), allocatable :: A(:, :), b(:), psi(:)
     real(8), allocatable :: potential(:), x(:)
     real(8) :: L, dx, dt, eps
@@ -112,7 +113,7 @@ contains
         D = 1 / dx**2 * D
         
         Hamiltonian = -0.5 * D + V
-        A = cmplx(eye, dt / 2 * Hamiltonian)
+        A = eye + ii * dt / 2 * Hamiltonian
 
     end subroutine
 
@@ -127,11 +128,11 @@ contains
         x_0 = p * L
         arg = x - x_0
         psi = exp(-d * arg**2 / 2) &
-            * cmplx(cos(k * arg), sin(k * arg)) &
+            * exp(ii * k * arg) &
             / sqrt(2 * pi * d)
         arg = x - (x_0 + L + dx)
         psi = psi + exp(-d * arg**2 / 2) &
-            * cmplx(cos(k * arg), sin(k * arg)) &
+            * exp(ii * k * arg) &
             / sqrt(2 * pi * d)
         b = matmul(conjg(A), psi)
 

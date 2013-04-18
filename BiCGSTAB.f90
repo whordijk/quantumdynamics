@@ -28,14 +28,14 @@ contains
 
         do while (error > eps)
             rhoold = rho
-            rho = dot_product(rhat, r)
+            rho = dot_product(conjg(rhat), r)
             beta = (rho / rhoold) * (alpha / omega)
             p = r + beta * (p - omega * v)
             v = matmul(A, p)
-            alpha = rho / dot_product(rhat, v)
+            alpha = rho / dot_product(conjg(rhat), v)
             s = r - alpha * v
             t = matmul(A, s)
-            omega = dot_product(t, s) / dot_product(t, t)
+            omega = dot_product(conjg(t), s) / dot_product(conjg(t), t)
             x = x + alpha * p + omega * s
             r = s - omega * t
             error = sqrt(sum(abs(r)**2)) / babs

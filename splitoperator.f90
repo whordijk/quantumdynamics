@@ -9,6 +9,7 @@ module splitoperator
     private
 
     real(8), parameter :: pi = 4 * atan(1d0)
+    complex(8) :: ii = (0d0, 1d0)
     complex(8), allocatable :: psi(:)
     real(8), allocatable :: V(:), x(:)
     real(8) :: L, dx, dt
@@ -25,15 +26,15 @@ contains
         real(8), intent(in) :: sample_length
 
         L = sample_length
-        n = nint(sample_length * 100)
+        n = nint(sample_length * 300)
         dx = sample_length / (n - 1)
-        dt = 1d-3
+        dt = dx**2
 
         allocate(psi(n), x(n), V(n))
 
         call linspace(n, x)
         call init_potential()
-        call init_wave(0.2d0)    ! fraction of the domain the wave is set
+        call init_wave(0.2d0)
 
     end subroutine
 
@@ -42,12 +43,12 @@ contains
         complex(8) :: phi(n)
         integer :: plan
                                
-        psi = cmplx(cos(dt * V), sin(dt * V)) * psi
-        call dfftw_plan_dft_1d(plan, n, psi, phi, -1, FFTW_ESTIMATE)
+        psi = exp(-ii * dt * V) * psi
+        call dfftw_plan_dft_1d(plan, n, psi, phi, 1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, psi, phi)
         call dfftw_destroy_plan(plan)
-        phi = cmplx(cos(dt * x**2 / 2), sin(-dt * x**2 / 2)) * phi
-        call dfftw_plan_dft_1d(plan, n, phi, psi, 1, FFTW_ESTIMATE)
+        phi = exp(ii * dt * (2 * pi * x / (L * dx))**2 / 2) * phi
+        call dfftw_plan_dft_1d(plan, n, phi, psi, -1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, phi, psi)
         call dfftw_destroy_plan(plan)
         psi = psi / n
@@ -71,7 +72,7 @@ contains
 
     subroutine init_potential()
 
-        V = (2 / L * x - 1)**60
+        !V = (2 / L * x - 1)**60
     
     end subroutine
 
