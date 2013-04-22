@@ -20,13 +20,13 @@ contains
 
     subroutine init_model(sample_length)
 
-        real(8), intent(in) :: sample_length
+        integer, intent(in) :: sample_length
 
-        L = sample_length
-        n = nint(sample_length * 200)
-        dx = sample_length / (n - 1)
+        n = sample_length
+        L = n
+        dx = 1
         dt = dx**2
-        eps = dx**2 * dt**3
+        eps = 1d-6
 
         allocate(A(n, n), b(n), psi(n), x(n), potential(n))
 
@@ -50,9 +50,9 @@ contains
         call plcol0(6)
         call plline(x, aimag(psi))
         call plcol0(3)
-        call plline(x, 2 * pi**2 * real(psi * conjg(psi)))
+        call plline(x, real(psi * conjg(psi)))
         call plcol0(7)
-        call plline(x, 1d-4 * potential)
+        call plline(x, potential)
         call plcol0(1)
         call plflush()
 
@@ -64,8 +64,8 @@ contains
 
         potential = 0
         do i = 1, n
-            if ((i > 0.375 * n .and. i < 0.425 * n) .or. (i > 0.675 * n .and. i < 0.725 * n)) then
-                potential(i) = 1000
+            if (i > 0.4 * L .and. i < 0.5 * L) then
+                potential(i) = 0.1
             end if
         end do
 
@@ -74,20 +74,18 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k = 50
+        real(8), parameter :: k = 0.5 
         real(8) :: arg(n)
         real(8) :: x_0, d
 
-        d = 50
+        d = L / 30
         x_0 = p * L
         arg = x - x_0
-        psi = exp(-d * arg**2 / 2) &
-            * exp(ii * k * arg) &
-            / sqrt(2 * pi * d)
+        psi = exp(-arg**2 / (2 * d**2)) &
+            * exp(ii * k * arg)
         arg = x - (x_0 + L + dx)
-        psi = psi + exp(-d * arg**2 / 2) &
-            * exp(ii * k * arg) &
-            / sqrt(2 * pi * d)
+        psi = psi + exp(-arg**2 / (2 * d**2)) &
+            * exp(ii * k * arg)
         b = mult_vec(psi, -1)
 
     end subroutine

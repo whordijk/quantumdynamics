@@ -7,7 +7,7 @@ program QuantumDynamics
     implicit none
 
     integer, parameter :: timesteps = 10000
-    real(8), parameter :: sample_length = 4
+    integer, parameter :: sample_length = 500
     integer :: i
 
     call init_model(sample_length)
@@ -44,7 +44,7 @@ contains
         call plinit()
 
         call plcol0(7)
-        call plenv(0d0, sample_length, -0.1d0, 0.1d0, 0, 0)
+        call plenv(0d0, 1d0 * sample_length, -1d0, 1d0, 0, 0)
         call pllab("x", "psi", "Wave plot")
 
         call plcol0(1)

@@ -23,11 +23,11 @@ contains
 
     subroutine init_model(sample_length)
 
-        real(8), intent(in) :: sample_length
+        integer, intent(in) :: sample_length
 
-        L = sample_length
-        n = nint(sample_length * 200)
-        dx = sample_length / (n - 1)
+        n = sample_length
+        L = n
+        dx = 1
         dt = dx**2
 
         allocate(psi(n), x(n), V(n))
@@ -62,9 +62,9 @@ contains
         call plcol0(6)
         call plline(x, aimag(psi))
         call plcol0(3)
-        call plline(x, 2 * pi**2 * real(psi * conjg(psi)))
+        call plline(x, real(psi * conjg(psi)))
         call plcol0(7)
-        call plline(x, 100000 * V)
+        call plline(x, V)
         call plcol0(1)
         call plflush()
 
@@ -79,20 +79,18 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k = 50
+        real(8), parameter :: k = 0.5
         real(8) :: arg(n)
         real(8) :: x_0, d
 
-        d = 50
+        d = n / 30
         x_0 = p * L
         arg = x - x_0
-        psi = exp(-d * arg**2 / 2) &
-            * cmplx(cos(k * arg), sin(k * arg)) &
-            / sqrt(2 * pi * d)
+        psi = exp(-arg**2 / (2 * d**2)) &
+            * cmplx(cos(k * arg), sin(k * arg))
         arg = x - (x_0 + L + dx)
-        psi = psi + exp(-d * arg**2 / 2) &
-            * cmplx(cos(k * arg), sin(k * arg)) &
-            / sqrt(2 * pi * d)
+        psi = psi + exp(-arg**2 / (2 * d**2)) &
+            * cmplx(cos(k * arg), sin(k * arg))
 
     end subroutine
 
