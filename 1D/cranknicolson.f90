@@ -32,7 +32,7 @@ contains
 
         call linspace(n, x)
         call init_potential()
-        call init_wave(0.2d0)
+        call init_wave(0.5d0)
 
     end subroutine
 
@@ -64,9 +64,10 @@ contains
 
         potential = 0
         do i = 1, n
-            if (i > 0.4 * L .and. i < 0.5 * L) then
-                potential(i) = 0.1
-            end if
+            !if (i > 0.5 * L) then
+            !    potential(i) = 0.05
+            !end if
+            potential = (2 * (x - L / 2) / L)**8
         end do
 
     end subroutine
@@ -74,7 +75,7 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k = 0.5 
+        real(8), parameter :: k = 0.3 
         real(8) :: arg(n)
         real(8) :: x_0, d
 

@@ -7,7 +7,7 @@ program QuantumDynamics
     implicit none
 
     integer, parameter :: timesteps = 10000
-    integer, parameter :: sample_length = 500
+    integer, parameter :: sample_length = 400
     integer :: i
 
     call init_model(sample_length)
