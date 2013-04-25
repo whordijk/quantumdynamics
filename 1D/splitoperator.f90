@@ -8,101 +8,42 @@ module splitoperator
 
     private
 
-    real(8), parameter :: pi = 4 * atan(1d0)
-    complex(8) :: ii = (0d0, 1d0)
-    complex(8), allocatable :: psi(:)
-    real(8), allocatable :: V(:), x(:)
-    real(8) :: L, dx, dt
-    integer :: n
+    real(8), allocatable :: potential(:)
 
-    public init_model
-    public step
-    public plot_wave
+    public init_method
+    public iterate
 
 contains
 
-    subroutine init_model(sample_length)
+    subroutine init_method(input)
 
-        integer, intent(in) :: sample_length
-
-        n = sample_length
-        L = n
-        dx = 1
-        dt = dx**2
-
-        allocate(psi(n), x(n), V(n))
-
-        call linspace(n, x)
-        call init_potential()
-        call init_wave(0.2d0)
+        real(8), intent(in) :: input(:)
+        
+        allocate(potential(size(input)))
+        potential = input
 
     end subroutine
 
-    subroutine step()
+    subroutine iterate(b, psi, x, eps)
 
-        complex(8) :: phi(n)
-        integer :: plan
-                               
-        psi = exp(-ii * dt * V) * psi
+        complex(8), intent(inout) :: psi(:)
+        complex(8), intent(in) :: b(:)
+        real(8), intent(in) :: x(:), eps
+        complex(8), parameter :: ii = (0d0, 1d0)
+        real(8), parameter :: pi = 4 * atan(1d0)
+        complex(8) :: phi(size(psi))
+        integer :: plan, n
+
+        n = size(psi)                               
+        psi = exp(-ii * potential) * psi
         call dfftw_plan_dft_1d(plan, n, psi, phi, 1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, psi, phi)
         call dfftw_destroy_plan(plan)
-        phi = exp(ii * dt * (2 * pi * x / (L * dx))**2 / 2) * phi
+        phi = exp(ii / 2 * (2 * pi * x / n)**2) * phi
         call dfftw_plan_dft_1d(plan, n, phi, psi, -1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, phi, psi)
         call dfftw_destroy_plan(plan)
         psi = psi / n
-
-    end subroutine
-
-    subroutine plot_wave()
-
-        call plclear()
-        call plline(x, real(psi))
-        call plcol0(6)
-        call plline(x, aimag(psi))
-        call plcol0(3)
-        call plline(x, real(psi * conjg(psi)))
-        call plcol0(7)
-        call plline(x, V)
-        call plcol0(1)
-        call plflush()
-
-    end subroutine
-
-    subroutine init_potential()
-
-        !V = (2 / L * x - 1)**60
-    
-    end subroutine
-
-    subroutine init_wave(p)
-
-        real(8), intent(in) :: p
-        real(8), parameter :: k = 0.5
-        real(8) :: arg(n)
-        real(8) :: x_0, d
-
-        d = n / 30
-        x_0 = p * L
-        arg = x - x_0
-        psi = exp(-arg**2 / (2 * d**2)) &
-            * cmplx(cos(k * arg), sin(k * arg))
-        arg = x - (x_0 + L + dx)
-        psi = psi + exp(-arg**2 / (2 * d**2)) &
-            * cmplx(cos(k * arg), sin(k * arg))
-
-    end subroutine
-
-    subroutine linspace(n, x)
-
-        integer, intent(in) :: n
-        real(8), intent(out) :: x(n)
-        integer :: i
-
-        do i = 1, n
-            x(i) = (i - 1) * dx
-        end do
 
     end subroutine
 

@@ -1,0 +1,104 @@
+module wavepacket
+
+    use plplot
+    use cranknicolson
+    !use splitoperator
+
+    implicit none
+    private
+
+    real(8), parameter :: pi = 4 * atan(1d0)
+    complex(8), parameter :: ii = (0d0, 1d0)
+    complex(8), allocatable :: b(:), psi(:)
+    real(8), allocatable :: potential(:), x(:)
+    real(8) :: L, dx, dt, eps
+    integer :: n
+
+    public init_model
+    public plot_wave
+    public step
+
+contains
+
+    subroutine init_model(sample_length)
+
+        integer, intent(in) :: sample_length
+
+        n = sample_length
+        L = n
+        dx = 1
+        dt = dx**2
+        eps = 1d-6
+
+        allocate(b(n), psi(n), x(n), potential(n))
+
+        call linspace(n, x)
+        call init_potential()
+        call init_wave(0.5d0)
+        call init_method(potential)
+
+    end subroutine
+
+    subroutine step()
+
+        call iterate(b, psi, x, eps)
+
+    end subroutine
+
+    subroutine plot_wave()
+
+        call plclear()
+        call plline(x, real(psi))
+        call plcol0(6)
+        call plline(x, aimag(psi))
+        call plcol0(3)
+        call plline(x, real(psi * conjg(psi)))
+        call plcol0(7)
+        call plline(x, potential)
+        call plcol0(1)
+        call plflush()
+
+    end subroutine
+
+    subroutine init_potential()
+
+        integer :: i
+
+        potential = 0
+        do i = 1, n
+            potential = (2 * (x - L / 2) / L)**8
+        end do
+
+    end subroutine
+
+    subroutine init_wave(p)
+
+        real(8), intent(in) :: p
+        real(8), parameter :: k = 0.3 
+        real(8) :: arg(n)
+        real(8) :: x_0, d
+
+        d = L / 30
+        x_0 = p * L
+        arg = x - x_0
+        psi = exp(-arg**2 / (2 * d**2)) &
+            * exp(ii * k * arg)
+        arg = x - (x_0 + L + dx)
+        psi = psi + exp(-arg**2 / (2 * d**2)) &
+            * exp(ii * k * arg)
+
+    end subroutine
+
+    subroutine linspace(n, x)
+
+        integer, intent(in) :: n
+        real(8), intent(out) :: x(n)
+        integer :: i
+
+        do i = 1, n
+            x(i) = (i - 1) * dx
+        end do
+
+    end subroutine
+    
+end module

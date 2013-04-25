@@ -12,6 +12,7 @@ LINK = $(FC) $(LDFLAGS)
 OBJS = 
 OBJS += cranknicolson.o
 OBJS += splitoperator.o
+OBJS += wavepacket.o
 OBJS += QuantumDynamics.o
 
 all: QuantumDynamics

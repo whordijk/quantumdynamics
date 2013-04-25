@@ -1,8 +1,7 @@
 program QuantumDynamics
 
     use plplot
-    use cranknicolson
-    !use splitoperator
+    use wavepacket
 
     implicit none
 
