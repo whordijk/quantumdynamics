@@ -1,7 +1,7 @@
 program QuantumDynamics
 
     use plplot
-    use WavePacket
+    use World
 
     implicit none
 
@@ -9,16 +9,16 @@ program QuantumDynamics
     integer, parameter :: sample_length = 300
     integer :: i
 
-    call init_model(sample_length)
+    call create_world(sample_length)
     call init_graphics()
     call plot_wave()
     do i = 1, timesteps
         call step()
-        if (mod(i, 1) == 0) then
+        if (mod(i, 3) == 0) then
             call plot_wave()
         end if
     end do
-    call plspause(.true.)
+    call plspause(.false.)
     call plend()
 
 contains

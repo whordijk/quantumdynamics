@@ -1,4 +1,4 @@
-module WavePacket
+module World
 
     use plplot
     use CrankNicolson
@@ -14,13 +14,13 @@ module WavePacket
     real(8) :: L, eps
     integer :: n
 
-    public init_model
+    public create_world
     public plot_wave
     public step
 
 contains
 
-    subroutine init_model(sample_length)
+    subroutine create_world(sample_length)
 
         integer, intent(in) :: sample_length
 
