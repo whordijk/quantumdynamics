@@ -1,7 +1,7 @@
 program QuantumDynamics
 
     use plplot
-    use wavepacket
+    use WavePacket
 
     implicit none
 

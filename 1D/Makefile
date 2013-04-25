@@ -10,9 +10,9 @@ COMPILE = $(FC) $(FFLAGS)
 LINK = $(FC) $(LDFLAGS)
 
 OBJS = 
-OBJS += cranknicolson.o
-OBJS += splitoperator.o
-OBJS += wavepacket.o
+OBJS += CrankNicolson.o
+OBJS += SplitOperator.o
+OBJS += WavePacket.o
 OBJS += QuantumDynamics.o
 
 all: QuantumDynamics

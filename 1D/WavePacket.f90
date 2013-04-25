@@ -1,8 +1,8 @@
 module wavepacket
 
     use plplot
-    use cranknicolson
-    ! use splitoperator
+    use CrankNicolson
+    ! use SplitOperator
 
     implicit none
     private
