@@ -24,7 +24,7 @@ contains
 
     end subroutine
 
-    subroutine iterate(b, psi, x, eps)
+    subroutine iterate(psi, x, b, eps)
 
         complex(8), intent(inout) :: psi(:)
         complex(8), intent(in) :: b(:)

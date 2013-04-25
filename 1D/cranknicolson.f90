@@ -21,11 +21,12 @@ contains
 
     end subroutine
 
-    subroutine iterate(b, psi, x, eps)
+    subroutine iterate(psi, x, b, eps)
 
-        complex(8), intent(inout) :: psi(:), b(:)
-        real(8), intent(in) :: x(:)
+        complex(8), intent(inout) :: psi(:)
+        complex(8), intent(inout) :: b(:)
         real(8), intent(in) :: eps
+        real(8), intent(in), optional :: x(:)
 
         b = mult_vec(psi, -1)
         call bicgstab_solve(b, psi, eps)

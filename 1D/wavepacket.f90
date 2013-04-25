@@ -2,7 +2,7 @@ module wavepacket
 
     use plplot
     use cranknicolson
-    !use splitoperator
+    ! use splitoperator
 
     implicit none
     private
@@ -11,7 +11,7 @@ module wavepacket
     complex(8), parameter :: ii = (0d0, 1d0)
     complex(8), allocatable :: b(:), psi(:)
     real(8), allocatable :: potential(:), x(:)
-    real(8) :: L, dx, dt, eps
+    real(8) :: L, eps
     integer :: n
 
     public init_model
@@ -26,8 +26,6 @@ contains
 
         n = sample_length
         L = n
-        dx = 1
-        dt = dx**2
         eps = 1d-6
 
         allocate(b(n), psi(n), x(n), potential(n))
@@ -41,7 +39,7 @@ contains
 
     subroutine step()
 
-        call iterate(b, psi, x, eps)
+        call iterate(psi, x, b, eps)
 
     end subroutine
 
@@ -74,7 +72,7 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k = 0.3 
+        real(8), parameter :: k = 0.35 
         real(8) :: arg(n)
         real(8) :: x_0, d
 
@@ -83,7 +81,7 @@ contains
         arg = x - x_0
         psi = exp(-arg**2 / (2 * d**2)) &
             * exp(ii * k * arg)
-        arg = x - (x_0 + L + dx)
+        arg = x - (x_0 + L + 1)
         psi = psi + exp(-arg**2 / (2 * d**2)) &
             * exp(ii * k * arg)
 
@@ -96,7 +94,7 @@ contains
         integer :: i
 
         do i = 1, n
-            x(i) = (i - 1) * dx
+            x(i) = i - 1
         end do
 
     end subroutine
