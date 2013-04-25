@@ -1,23 +1,22 @@
 program QuantumDynamics
 
     use plplot
-    use cranknicolson
-    !use splitoperator
+    use World
 
     implicit none
 
-    integer, parameter :: timesteps = 0
+    integer, parameter :: timesteps = 1000000
     integer, parameter :: sample_length = 500
     integer, parameter :: sample_width = 500
     integer :: i
 
-    call init_model(sample_length, sample_width)
+    call create_world(sample_length, sample_width)
     call init_graphics()
     call plot_wave()
     do i = 1, timesteps
         call step()
         if (mod(i, 1) == 0) then
-            call plot_wave()
+            ! call plot_wave()
         end if
     end do
     call plspause(.true.)
@@ -46,7 +45,7 @@ contains
 
         call plcol0(7)
         call plenv(0d0, 1d0 * sample_length, 0d0, 1d0 * sample_width, 0, -2);
-        call plw3d(3d0, 3d0, 3d0, 0d0, 1d0 * sample_length, 0d0, 1d0 * sample_width, 0d0, 1d0, 90, 0);
+        call plw3d(3d0, 3d0, 3d0, 0d0, 1d0 * sample_length, 0d0, 1d0 * sample_width, 0d0, 1d0, 90d0, 0d0);
         call pllab("x", "psi", "Wave plot")
 
         call plcol0(1)
