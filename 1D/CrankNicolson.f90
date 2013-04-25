@@ -1,4 +1,4 @@
-module cranknicolson
+module CrankNicolson
 
     use plplot
 

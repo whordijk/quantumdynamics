@@ -1,4 +1,4 @@
-module splitoperator
+module SplitOperator
 
     use plplot
 
