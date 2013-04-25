@@ -1,14 +1,18 @@
-module CrankNicolson
+module TimeStep
 
     use plplot
 
     implicit none
+
+    include '/usr/include/fftw3.f'
+
     private
 
     real(8), allocatable :: potential(:)
 
     public init_method
-    public iterate
+    public crank_nicolson
+    public split_operator
 
 contains
 
@@ -21,19 +25,18 @@ contains
 
     end subroutine
 
-    subroutine iterate(psi, x, b, eps)
+    subroutine crank_nicolson(psi, b, eps)
 
         complex(8), intent(inout) :: psi(:)
         complex(8), intent(inout) :: b(:)
         real(8), intent(in) :: eps
-        real(8), intent(in), optional :: x(:)
 
         b = mult_vec(psi, -1)
-        call bicgstab_solve(b, psi, eps)
+        call bicgstab_solve(psi, b, eps)
 
     end subroutine
 
-    subroutine bicgstab_solve(b, psi, eps)
+    subroutine bicgstab_solve(psi, b, eps)
 
         complex(8), intent(in) :: b(:)
         real(8), intent(in) :: eps
@@ -82,5 +85,27 @@ contains
                 + potential * vec)
     
     end function
+
+    subroutine split_operator(psi, x)
+
+        complex(8), intent(inout) :: psi(:)
+        complex(8), parameter :: ii = (0d0, 1d0)
+        real(8), intent(in) :: x(:)
+        real(8), parameter :: pi = 4 * atan(1d0)
+        complex(8) :: phi(size(psi))
+        integer :: plan, n
+
+        n = size(psi)                               
+        psi = exp(-ii * potential) * psi
+        call dfftw_plan_dft_1d(plan, n, psi, phi, 1, FFTW_ESTIMATE)
+        call dfftw_execute_dft(plan, psi, phi)
+        call dfftw_destroy_plan(plan)
+        phi = exp(ii / 2 * (2 * pi * x / n)**2) * phi
+        call dfftw_plan_dft_1d(plan, n, phi, psi, -1, FFTW_ESTIMATE)
+        call dfftw_execute_dft(plan, phi, psi)
+        call dfftw_destroy_plan(plan)
+        psi = psi / n
+
+    end subroutine
 
 end module

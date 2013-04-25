@@ -1,8 +1,7 @@
 module World
 
     use plplot
-    use CrankNicolson
-    ! use SplitOperator
+    use TimeStep
 
     implicit none
     private
@@ -39,7 +38,8 @@ contains
 
     subroutine step()
 
-        call iterate(psi, x, b, eps)
+        ! call crank_nicolson(psi, b, eps)
+        call split_operator(psi, x)
 
     end subroutine
 
