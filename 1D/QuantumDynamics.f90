@@ -6,7 +6,7 @@ program QuantumDynamics
     implicit none
 
     integer, parameter :: timesteps = 1000000
-    integer, parameter :: sample_length = 300
+    integer, parameter :: sample_length = 2000
     integer :: i
 
     call create_world(sample_length)
@@ -44,7 +44,6 @@ contains
 
         call plcol0(7)
         call plenv(0d0, 1d0 * sample_length, -1d0, 1d0, 0, 0)
-        call pllab("x", "psi", "Wave plot")
 
         call plcol0(1)
 

@@ -25,27 +25,29 @@ contains
 
     end subroutine
 
-    subroutine crank_nicolson(psi, b, eps)
+    subroutine crank_nicolson(psi, b, m, eps)
 
         complex(8), intent(inout) :: psi(:)
         complex(8), intent(inout) :: b(:)
         real(8), intent(in) :: eps
+        integer, intent(in) :: m
 
-        b = mult_vec(psi, -1)
-        call bicgstab_solve(psi, b, eps)
+        b = mult_vec(psi, -1, m)
+        call bicgstab_solve(psi, b, m, eps)
 
     end subroutine
 
-    subroutine bicgstab_solve(psi, b, eps)
+    subroutine bicgstab_solve(psi, b, m, eps)
 
         complex(8), intent(in) :: b(:)
         real(8), intent(in) :: eps
+        integer, intent(in) :: m
         complex(8), intent(inout) :: psi(:)
         complex(8), dimension(size(psi)) :: r, rhat, p, v, s, t
         complex(8) :: rho, rhoold, alpha, beta, omega
         real(8) :: babs, error
 
-        r = b - mult_vec(psi, 1)
+        r = b - mult_vec(psi, 1, m)
         rhat = r
         rho = 1
         alpha = 1
@@ -60,10 +62,10 @@ contains
             rho = dot_product(rhat, r)
             beta = (rho / rhoold) * (alpha / omega)
             p = r + beta * (p - omega * v)
-            v = mult_vec(p, 1)
+            v = mult_vec(p, 1, m)
             alpha = rho / dot_product(rhat, v)
             s = r - alpha * v
-            t = mult_vec(s, 1)
+            t = mult_vec(s, 1, m)
             omega = dot_product(t, s) / dot_product(t, t)
             psi = psi + alpha * p + omega * s
             r = s - omega * t
@@ -72,16 +74,16 @@ contains
 
     end subroutine
     
-    function mult_vec(vec, h)
+    function mult_vec(vec, h, m)
     
         complex(8), intent(inout) :: vec(:)
-        integer, intent(in) :: h
+        integer, intent(in) :: h, m
         complex(8), parameter :: ii = (0d0, 1d0)
         complex(8) :: mult_vec(size(vec))
 
         mult_vec = vec + &
             ii * h / 2 * (-1d0 / 2 * &
-                (cshift(vec, -1) - 2d0 * vec + cshift(vec, 1)) &
+                (cshift(vec, -m) + cshift(vec, -1) - 4d0 * vec + cshift(vec, 1) + cshift(vec, m)) &
                 + potential * vec)
     
     end function

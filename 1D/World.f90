@@ -31,15 +31,15 @@ contains
 
         call linspace(n, x)
         call init_potential()
-        call init_wave(0.5d0)
+        call init_wave(0.3d0)
         call init_method(potential)
 
     end subroutine
 
     subroutine step()
 
-        ! call crank_nicolson(psi, b, eps)
-        call split_operator(psi, x)
+        call crank_nicolson(psi, b, eps)
+        ! call split_operator(psi, x)
 
     end subroutine
 
@@ -52,7 +52,7 @@ contains
         call plcol0(3)
         call plline(x, real(psi * conjg(psi)))
         call plcol0(7)
-        call plline(x, potential)
+        call plline(x, 7 * potential)
         call plcol0(1)
         call plflush()
 
@@ -62,9 +62,12 @@ contains
 
         integer :: i
 
-        potential = 0
+        potential = 0d0
         do i = 1, n
-            potential = (2 * (x - L / 2) / L)**8
+            if (i > 0.45 * n .and. i < 0.45 * n + 10 * pi) then
+                potential(i) = 0.01d0
+                !potential = (2 * (x - L / 2) / L)**12
+            end if
         end do
 
     end subroutine
@@ -72,11 +75,11 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k = 0.35 
         real(8) :: arg(n)
-        real(8) :: x_0, d
+        real(8) :: x_0, k, d
 
-        d = L / 30
+        k = 500 / L
+        d = L / 100
         x_0 = p * L
         arg = x - x_0
         psi = exp(-arg**2 / (2 * d**2)) &
