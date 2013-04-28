@@ -5,7 +5,7 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 1000000
+    integer, parameter :: timesteps = 200
     integer, parameter :: sample_length = 200
     integer, parameter :: sample_width = 200
     integer :: i
@@ -19,7 +19,8 @@ program QuantumDynamics
             call plot_wave()
         end if
     end do
-    call plspause(.true.)
+    call write_intensity()
+    call plspause(.false.)
     call plend()
 
 contains

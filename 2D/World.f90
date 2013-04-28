@@ -9,13 +9,14 @@ module World
     real(8), parameter :: pi = 4 * atan(1d0)
     complex(8), parameter :: ii = (0d0, 1d0)
     complex(8), allocatable :: b(:), psi(:, :), psivec(:)
-    real(8), allocatable :: potential(:, :), potvec(:), x(:), y(:)
+    real(8), allocatable :: potential(:, :), potvec(:), x(:), y(:), intensity(:, :)
     real(8) :: L, W, eps
     integer :: n, m
 
     public create_world
     public plot_wave
     public step
+    public write_intensity
 
 contains
 
@@ -29,8 +30,9 @@ contains
         W = m
         eps = 1d-6
 
-        allocate(b(n * m), psivec(n * m), psi(n, m), x(n), y(m), potvec(n * m), potential(n, m))
+        allocate(b(n * m), psivec(n * m), psi(n, m), x(n), y(m), intensity(n, m), potvec(n * m), potential(n, m))
 
+        intensity = 0
         call linspace(n, x)
         call linspace(m, y)
         call init_potential()
@@ -52,7 +54,8 @@ contains
         call plclear()
         call plcol0(7) 
         call plbox('abc',50d0, 1, 'abc', 10d0, 2)
-        call plimage(real(psi), 0d0, 1d0 * L, 0d0, 1d0 * W, -1d0, 1d0, 0d0, 1d0 * L, 0d0, 1d0 * W) 
+        call plimage(real(psi * conjg(psi)), &
+            0d0, 1d0 * L, 0d0, 1d0 * W, 0d0, 0.3d0, 0d0, 1d0 * L, 0d0, 1d0 * W) 
         call plflush()
 
     end subroutine
@@ -64,9 +67,9 @@ contains
         potential = 0
         do i = 1, n
             do j = 1, m
-                if ((i > 0.399 * L .and. i < 0.401 * L) .and. (j < 0.44 * W & 
-                    .or. (j > 0.45 * W .and. j < 0.55 * W) &
-                    .or. j > 0.56 * W)) then
+                if ((i > 0.399 * L .and. i < 0.401 * L) .and. (j < 0.42 * W & 
+                    .or. (j > 0.48 * W .and. j < 0.52 * W) &
+                    .or. j > 0.58 * W)) then
                     potential(i, j) = 1000d0
                 end if
             end do
@@ -110,5 +113,18 @@ contains
         end do
 
     end subroutine
-    
+
+    subroutine write_intensity()
+
+        integer :: j
+
+        intensity = real(real(psi * conjg(psi)))
+        open (unit = 12 , file = 'intensity.dat' , status = 'replace')
+        do j = 1, m
+            write (12, *) intensity(nint(0.5 * L), j), j
+        end do
+        close (unit = 12)
+
+    end subroutine
+
 end module
