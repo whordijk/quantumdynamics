@@ -5,8 +5,8 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 1000000
-    integer, parameter :: sample_length = 2000
+    integer, parameter :: timesteps = 1000
+    integer, parameter :: sample_length = 1000
     integer :: i
 
     call create_world(sample_length)
@@ -14,7 +14,7 @@ program QuantumDynamics
     call plot_wave()
     do i = 1, timesteps
         call step()
-        if (mod(i, 1) == 0) then
+        if (mod(i, 5) == 0) then
             call plot_wave()
         end if
     end do

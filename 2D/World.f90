@@ -30,21 +30,24 @@ contains
         W = m
         eps = 1d-6
 
-        allocate(b(n * m), psivec(n * m), psi(n, m), x(n), y(m), intensity(n, m), potvec(n * m), potential(n, m))
+        allocate(b(n * m), psivec(n * m), psi(n, m), x(n), y(m), &
+            intensity(n, m), potvec(n * m), potential(n, m))
 
         intensity = 0
         call linspace(n, x)
         call linspace(m, y)
         call init_potential()
         call init_wave(0.2d0)
-        call init_method(potvec)
+        call init_method(potvec, potential)
 
     end subroutine
 
     subroutine step()
 
         call crank_nicolson(psivec, b, m, eps)
-        ! call split_operator(psivec, x, y)
+        ! call split_operator(psi)
+
+        call calc_intensity()
 
     end subroutine
 
@@ -54,8 +57,8 @@ contains
         call plclear()
         call plcol0(7) 
         call plbox('abc',50d0, 1, 'abc', 10d0, 2)
-        call plimage(real(psi * conjg(psi)), &
-            0d0, 1d0 * L, 0d0, 1d0 * W, 0d0, 0.3d0, 0d0, 1d0 * L, 0d0, 1d0 * W) 
+        call plimage(real(psi), &
+            0d0, 1d0 * L, 0d0, 1d0 * W, -1d0, 1d0, 0d0, 1d0 * L, 0d0, 1d0 * W) 
         call plflush()
 
     end subroutine
@@ -67,10 +70,11 @@ contains
         potential = 0
         do i = 1, n
             do j = 1, m
-                if ((i > 0.399 * L .and. i < 0.401 * L) .and. (j < 0.42 * W & 
-                    .or. (j > 0.48 * W .and. j < 0.52 * W) &
-                    .or. j > 0.58 * W)) then
-                    potential(i, j) = 1000d0
+                if ((i > 0.3 * L .and. i < (0.3 * L + 1)) .and. &
+                    (j < 0.4 * W .or. (j >= (0.4 * W + 1) & 
+                    .and. j <= (0.6 * W - 1)) .or. j > 0.6 * W)) then
+                    !(j < 0.3 * W .or. j > 0.7 * W)) then
+                    potential(i, j) = 100d0
                 end if
             end do
         end do
@@ -82,12 +86,13 @@ contains
     subroutine init_wave(p)
 
         real(8), intent(in) :: p
-        real(8), parameter :: k_x = 0.35 
+        real(8) :: k_x
         real(8) :: arg(n)
         real(8) :: x_0, d
         integer :: j
 
-        d = L / 30
+        k_x = 300 / L
+        d = L / 50
         x_0 = p * L
         arg = x - x_0
         psi(:, 1) = exp(-arg**2 / (2 * d**2)) &
@@ -114,11 +119,16 @@ contains
 
     end subroutine
 
+    subroutine calc_intensity()
+
+        intensity = intensity + real(conjg(psi) * psi)
+
+    end subroutine
+
     subroutine write_intensity()
 
         integer :: j
 
-        intensity = real(real(psi * conjg(psi)))
         open (unit = 12 , file = 'intensity.dat' , status = 'replace')
         do j = 1, m
             write (12, *) intensity(nint(0.5 * L), j), j

@@ -8,7 +8,7 @@ module TimeStep
 
     private
 
-    real(8), allocatable :: potential(:)
+    real(8), allocatable :: potential(:), potmat(:, :), ksq(:, :)
 
     public init_method
     public crank_nicolson
@@ -16,12 +16,21 @@ module TimeStep
 
 contains
 
-    subroutine init_method(input)
+    subroutine init_method(input, inputmat)
 
-        real(8) :: input(:)
+        real(8) :: input(:), inputmat(:, :)
+        real(8), parameter :: pi = 4 * atan(1d0)
+        integer :: i, j
 
-        allocate(potential(size(input)))
+        allocate(potential(size(input)), potmat(size(inputmat, 1), &
+            size(inputmat, 2)), ksq(size(inputmat, 1), size(inputmat, 2)))
         potential = input
+        potmat = inputmat
+        do i = 1, size(inputmat, 1)
+            do j = 1, size(inputmat, 2)
+                ksq(i, j) = 4 * pi**2 / real(size(inputmat, 1) * size(inputmat, 2)) * (i**2 + j**2)
+            end do
+        end do
 
     end subroutine
 
@@ -88,22 +97,22 @@ contains
     
     end function
 
-    subroutine split_operator(psi, x, y)
+    subroutine split_operator(psi)
 
-        complex(8), intent(inout) :: psi(:)
+        complex(8), intent(inout) :: psi(:, :)
         complex(8), parameter :: ii = (0d0, 1d0)
-        real(8), intent(in) :: x(:), y(:)
-        real(8), parameter :: pi = 4 * atan(1d0)
-        complex(8) :: phi(size(psi))
-        integer :: plan, n
+        real(8), parameter :: dt = 1
+        complex(8) :: phi(size(psi, 1), size(psi, 2))
+        integer :: plan, n, m
 
-        n = size(psi)                               
-        psi = exp(-ii * potential) * psi
-        call dfftw_plan_dft_1d(plan, n, psi, phi, 1, FFTW_ESTIMATE)
+        n = size(psi, 1)
+        m = size(psi, 2)
+        psi = exp(-ii * dt * potmat) * psi
+        call dfftw_plan_dft_2d(plan, n, m, psi, phi, 1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, psi, phi)
         call dfftw_destroy_plan(plan)
-        phi = exp(ii / 2 * (2 * pi * x / n)**2) * phi
-        call dfftw_plan_dft_1d(plan, n, phi, psi, -1, FFTW_ESTIMATE)
+        phi = exp(ii / 2 * dt * ksq) * phi
+        call dfftw_plan_dft_2d(plan, n, m, phi, psi, -1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, phi, psi)
         call dfftw_destroy_plan(plan)
         psi = psi / n

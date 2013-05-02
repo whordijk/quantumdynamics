@@ -39,7 +39,7 @@ contains
     subroutine step()
 
         call crank_nicolson(psi, b, eps)
-        ! call split_operator(psi, x)
+        !call split_operator(psi, x)
 
     end subroutine
 
@@ -63,12 +63,13 @@ contains
         integer :: i
 
         potential = 0d0
-        do i = 1, n
-            if (i > 0.45 * n .and. i < 0.45 * n + 10 * pi) then
-                potential(i) = 0.01d0
-                !potential = (2 * (x - L / 2) / L)**12
-            end if
-        end do
+        !do i = 1, n
+        !    if ((i > 0.4 * n .and. i < (0.4 * n + 2)) .or. & 
+        !        (i > (0.5 * n  + 2 * pi) .and. i < (0.5 * n + 2 * pi + 2))) then
+        !        potential(i) = 0.03d0
+        !        !potential = (2 * (x - L / 2) / L)**12
+        !    end if
+        !end do
 
     end subroutine
 

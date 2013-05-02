@@ -5,9 +5,9 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 200
-    integer, parameter :: sample_length = 200
-    integer, parameter :: sample_width = 200
+    integer, parameter :: timesteps = 300
+    integer, parameter :: sample_length = 400
+    integer, parameter :: sample_width = 400
     integer :: i
 
     call create_world(sample_length, sample_width)
