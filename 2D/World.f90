@@ -44,8 +44,8 @@ contains
 
     subroutine step()
 
-        call crank_nicolson(psivec, b, m, eps)
-        ! call split_operator(psi)
+        ! call crank_nicolson(psivec, b, m, eps)
+        call split_operator(psi)
 
         call calc_intensity()
 
@@ -71,9 +71,9 @@ contains
         do i = 1, n
             do j = 1, m
                 if ((i > 0.3 * L .and. i < (0.3 * L + 1)) .and. &
-                    (j < 0.4 * W .or. (j >= (0.4 * W + 1) & 
-                    .and. j <= (0.6 * W - 1)) .or. j > 0.6 * W)) then
-                    !(j < 0.3 * W .or. j > 0.7 * W)) then
+                    !(j < 0.48 * W .or. (j >= (0.48 * W + 2) & 
+                    !.and. j <= (0.52 * W - 2)) .or. j > 0.52 * W)) then
+                    (j < 0.48 * W .or. j > 0.52 * W)) then
                     potential(i, j) = 100d0
                 end if
             end do

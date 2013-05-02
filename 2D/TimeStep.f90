@@ -20,15 +20,17 @@ contains
 
         real(8) :: input(:), inputmat(:, :)
         real(8), parameter :: pi = 4 * atan(1d0)
-        integer :: i, j
+        integer :: i, j, n, m
 
         allocate(potential(size(input)), potmat(size(inputmat, 1), &
             size(inputmat, 2)), ksq(size(inputmat, 1), size(inputmat, 2)))
         potential = input
         potmat = inputmat
-        do i = 1, size(inputmat, 1)
-            do j = 1, size(inputmat, 2)
-                ksq(i, j) = 4 * pi**2 / real(size(inputmat, 1) * size(inputmat, 2)) * (i**2 + j**2)
+        n = size(inputmat, 1)
+        m = size(inputmat, 2)
+        do i = 1, n
+            do j = 1, m
+                ksq(i, j) = 4 * pi**2 * (real(i / n)**2 + real(j / m)**2)
             end do
         end do
 
@@ -108,11 +110,11 @@ contains
         n = size(psi, 1)
         m = size(psi, 2)
         psi = exp(-ii * dt * potmat) * psi
-        call dfftw_plan_dft_2d(plan, n, m, psi, phi, 1, FFTW_ESTIMATE)
+        call dfftw_plan_dft_2d(plan, n, m, psi, phi, -1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, psi, phi)
         call dfftw_destroy_plan(plan)
-        phi = exp(ii / 2 * dt * ksq) * phi
-        call dfftw_plan_dft_2d(plan, n, m, phi, psi, -1, FFTW_ESTIMATE)
+        phi = exp(-ii / 2 * dt * ksq) * phi
+        call dfftw_plan_dft_2d(plan, n, m, phi, psi, 1, FFTW_ESTIMATE)
         call dfftw_execute_dft(plan, phi, psi)
         call dfftw_destroy_plan(plan)
         psi = psi / n

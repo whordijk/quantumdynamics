@@ -5,7 +5,7 @@ program QuantumDynamics
 
     implicit none
 
-    integer, parameter :: timesteps = 1000
+    integer, parameter :: timesteps = 10000
     integer, parameter :: sample_length = 1000
     integer :: i
 
